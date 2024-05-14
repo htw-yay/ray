@@ -13,17 +13,24 @@ pub struct Settings {
     pub image_width: u32,
     pub image_height: u32,
     pub samples_per_pixel: u32,
+    pub max_depth: u32,
     pub viewport_width: f64,
     pub viewport_height: f64,
 }
 impl Settings {
-    pub fn new(image_width: u32, image_height: u32, samples_per_pixel: u32) -> Settings {
+    pub fn new(
+        image_width: u32,
+        image_height: u32,
+        samples_per_pixel: u32,
+        max_depth: u32,
+    ) -> Settings {
         let viewport_height = 2.0;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
         Settings {
             image_width,
             image_height,
             samples_per_pixel,
+            max_depth,
             viewport_width,
             viewport_height,
         }
@@ -65,7 +72,7 @@ impl Scene {
                         + (i as f64 + offset_x) * pixel_delta_u
                         + (j as f64 + offset_y) * pixel_delta_v;
                     let ray = R::connect(self.camera.pos, pixel);
-                    pixel_color += ray.color(&self.objects)
+                    pixel_color += ray.color(&self.objects, settings.max_depth)
                 }
                 pixel_color /= settings.samples_per_pixel as f64;
                 imgbuf.put_pixel(i, j, pixel_color.into());
@@ -77,12 +84,6 @@ impl Scene {
 #[derive(Debug)]
 pub struct Intvl(f64, f64);
 impl Intvl {
-    fn len(&self) -> f64 {
-        self.1 - self.0
-    }
-    fn contain(&self, x: f64) -> bool {
-        self.0 <= x && x <= self.1
-    }
     fn surround(&self, x: f64) -> bool {
         self.0 < x && x < self.1
     }

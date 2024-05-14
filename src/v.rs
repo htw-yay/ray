@@ -1,6 +1,10 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::{
+    f64::consts::PI,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+};
 
 use image::Rgb;
+use rand::{thread_rng, Rng};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct V(pub f64, pub f64, pub f64);
@@ -71,6 +75,13 @@ impl DivAssign<f64> for V {
         *self = V(x / rhs, y / rhs, z / rhs);
     }
 }
+impl Neg for V {
+    type Output = V;
+    fn neg(self) -> V {
+        let V(x, y, z) = self;
+        V(-x, -y, -z)
+    }
+}
 
 impl V {
     pub fn x(&self) -> f64 {
@@ -102,6 +113,21 @@ impl V {
     }
     pub fn unit(&self) -> V {
         *self / self.norm()
+    }
+    pub fn random_on_hemisphere(n: V) -> V {
+        let mut rng = thread_rng();
+        let theta = rng.gen_range(0.0..=PI);
+        let phi = rng.gen_range(0.0..2.0 * PI);
+        let v = V(
+            theta.sin() * phi.cos(),
+            theta.sin() * phi.sin(),
+            theta.cos(),
+        );
+        if v.dot(n) > 0.0 {
+            v
+        } else {
+            -v
+        }
     }
 }
 

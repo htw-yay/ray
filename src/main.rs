@@ -1,6 +1,6 @@
 use ray::{obj::Sphere, Camera, Scene, Settings, V};
 fn main() {
-    let settings = Settings::new(1280, 720, 30);
+    let settings = Settings::new(1280, 720, 32, 8);
     let mut imgbuf = settings.build();
     let scene = Scene {
         objects: vec![
