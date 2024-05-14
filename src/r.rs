@@ -1,7 +1,5 @@
 use std::f64::INFINITY;
 
-use image::Rgb;
-
 use crate::{HitRecord, Intvl, Object, V};
 
 #[derive(Debug, Clone, Copy)]
@@ -17,7 +15,7 @@ impl R {
     pub fn at(&self, t: f64) -> V {
         self.q + t * self.d
     }
-    pub fn color(&self, objects: &Vec<Box<dyn Object>>) -> Rgb<u8> {
+    pub fn color(&self, objects: &Vec<Box<dyn Object>>) -> V {
         let mut t_closest = INFINITY;
         let mut hit_record = HitRecord::default();
         let mut is_hit = false;
@@ -29,9 +27,9 @@ impl R {
             }
         }
         if is_hit {
-            return (0.5 * (hit_record.n + V(1.0, 1.0, 1.0))).into();
+            return 0.5 * (hit_record.n + V(1.0, 1.0, 1.0));
         }
         let t = 0.5 * (self.d.unit().y() + 1.0);
-        R::connect(V(1.0, 1.0, 1.0), V(0.5, 0.7, 1.0)).at(t).into()
+        R::connect(V(1.0, 1.0, 1.0), V(0.5, 0.7, 1.0)).at(t)
     }
 }

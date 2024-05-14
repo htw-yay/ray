@@ -5,22 +5,25 @@ use image::{ImageBuffer, Rgb, RgbImage};
 pub use obj::HitRecord;
 pub use obj::Object;
 pub use r::R;
+use rand::{thread_rng, Rng};
 pub use v::V;
 
 #[derive(Debug)]
 pub struct Settings {
     pub image_width: u32,
     pub image_height: u32,
+    pub samples_per_pixel: u32,
     pub viewport_width: f64,
     pub viewport_height: f64,
 }
 impl Settings {
-    pub fn new(image_width: u32, image_height: u32) -> Settings {
+    pub fn new(image_width: u32, image_height: u32, samples_per_pixel: u32) -> Settings {
         let viewport_height = 2.0;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
         Settings {
             image_width,
             image_height,
+            samples_per_pixel,
             viewport_width,
             viewport_height,
         }
@@ -46,17 +49,26 @@ impl Scene {
         let viewport_v = V(0.0, -settings.viewport_height, 0.0);
         let pixel_delta_u = viewport_u / settings.image_width as f64;
         let pixel_delta_v = viewport_v / settings.image_height as f64;
+        let pixel_00 = self.camera.pos
+            - V(0.0, 0.0, self.camera.focal_length)
+            - (viewport_u + viewport_v) / 2.0
+            + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+        let mut rng = thread_rng();
 
         for i in 0..settings.image_width {
             for j in 0..settings.image_height {
-                let pixel = self.camera.pos
-                    - V(0.0, 0.0, self.camera.focal_length)
-                    - (viewport_u + viewport_v) / 2.0
-                    + 0.5 * (pixel_delta_u + pixel_delta_v)
-                    + i as f64 * pixel_delta_u
-                    + j as f64 * pixel_delta_v;
-                let ray = R::connect(self.camera.pos, pixel);
-                imgbuf.put_pixel(i, j, ray.color(&self.objects));
+                let mut pixel_color = V(0.0, 0.0, 0.0);
+                for _ in 1..=settings.samples_per_pixel {
+                    let (offset_x, offset_y) = (rng.gen_range(-0.5..0.5), rng.gen_range(-0.5..0.5));
+                    let pixel = pixel_00
+                        + (i as f64 + offset_x) * pixel_delta_u
+                        + (j as f64 + offset_y) * pixel_delta_v;
+                    let ray = R::connect(self.camera.pos, pixel);
+                    pixel_color += ray.color(&self.objects)
+                }
+                pixel_color /= settings.samples_per_pixel as f64;
+                imgbuf.put_pixel(i, j, pixel_color.into());
             }
         }
     }
