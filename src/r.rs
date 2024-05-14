@@ -33,7 +33,7 @@ impl R {
             return 0.5
                 * R {
                     q: hit_record.p,
-                    d: V::random_on_hemisphere(hit_record.n),
+                    d: hit_record.n + V::random_unit(),
                 }
                 .color(objects, remaining_depth - 1);
         }

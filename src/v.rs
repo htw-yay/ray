@@ -114,20 +114,15 @@ impl V {
     pub fn unit(&self) -> V {
         *self / self.norm()
     }
-    pub fn random_on_hemisphere(n: V) -> V {
+    pub fn random_unit() -> V {
         let mut rng = thread_rng();
         let theta = rng.gen_range(0.0..=PI);
         let phi = rng.gen_range(0.0..2.0 * PI);
-        let v = V(
+        V(
             theta.sin() * phi.cos(),
             theta.sin() * phi.sin(),
             theta.cos(),
-        );
-        if v.dot(n) > 0.0 {
-            v
-        } else {
-            -v
-        }
+        )
     }
 }
 
