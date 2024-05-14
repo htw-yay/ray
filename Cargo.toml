@@ -1,0 +1,7 @@
+[package]
+name = "ray"
+edition = "2021"
+version = "0.1.0"
+
+[dependencies]
+image = "0.25.1"
